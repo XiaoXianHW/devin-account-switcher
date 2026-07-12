@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Devin Account Switcher",
+  "version": "1.0.0",
+  "description": "一键导入多个 GitHub 账号、自动登录 Devin、列表切换、查看额度、结束/删除会话。",
+  "permissions": ["storage", "cookies", "tabs", "scripting", "declarativeNetRequest"],
+  "host_permissions": [
+    "https://github.com/*",
+    "https://*.github.com/*",
+    "https://app.devin.ai/*",
+    "https://api.devin.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "打开 Devin 账号面板",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
