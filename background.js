@@ -109,26 +109,6 @@ async function refreshMeta(accountId, session, devinUrl) {
   return { quota, plan, expired: q.expired || b.expired };
 }
 
-// Runs in the page (MAIN world) on app.devin.ai to apply a session.
-function applySessionInPage(blob) {
-  try {
-    // Drop the previous account's auth state (token, csrf, oauth state);
-    // a leftover auth1_csrf from another account triggers a 401 -> logout.
-    for (const store of [localStorage, sessionStorage]) {
-      const stale = [];
-      for (let i = 0; i < store.length; i++) {
-        const k = store.key(i);
-        if (k && k.startsWith("auth1")) stale.push(k);
-      }
-      stale.forEach((k) => store.removeItem(k));
-    }
-    localStorage.setItem("auth1_session", blob.auth1_session);
-    return "ok";
-  } catch (e) {
-    return "err:" + String(e);
-  }
-}
-
 function buildAuthBlob(session) {
   // Confirmed against the live Devin web app bundle: it reads
   //   JSON.parse(localStorage["auth1_session"]) and requires { token, userId }.
@@ -142,7 +122,7 @@ function buildAuthBlob(session) {
 async function getOrCreateDevinTab(origin) {
   const tabs = await chrome.tabs.query({ url: origin + "/*" });
   if (tabs.length > 0) return tabs[0];
-  return await chrome.tabs.create({ url: origin + "/login", active: true });
+  return await chrome.tabs.create({ url: origin + "/", active: true });
 }
 
 // Navigate a tab and resolve only once the navigation we triggered has
@@ -177,22 +157,17 @@ async function handleSwitch(accountId) {
   }
   const { devinUrl } = await getSettings();
   const origin = new URL(devinUrl).origin;
-  const tab = await getOrCreateDevinTab(origin);
-  // Land on /login first: it keeps us on the app origin without bouncing to
-  // the marketing site, so we have a page to write localStorage into.
-  await navigateAndWait(tab.id, origin + "/login");
   const blob = buildAuthBlob(acc.session);
-  const [{ result } = {}] = await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    world: "MAIN",
-    func: applySessionInPage,
-    args: [blob],
-  });
-  if (result !== "ok") {
-    return { ok: false, error: "写入登录态失败：" + String(result) };
-  }
-  // Fresh full load of the app now reads the account we just wrote.
-  await navigateAndWait(tab.id, origin + "/");
+  // Carry the target session in the URL fragment. The document_start content
+  // script reads it synchronously and writes localStorage before the SPA boots,
+  // so the app comes up already signed in instead of 302-ing to auth.devin.ai
+  // (Auth0). The `_das` query param forces a full document load even when the
+  // tab is already sitting on "/". Fragments/queries are stripped by the script.
+  const bust = Date.now();
+  const target =
+    origin + "/?_das=" + bust + "#das_auth=" + encodeURIComponent(blob.auth1_session);
+  const tab = await getOrCreateDevinTab(origin);
+  await navigateAndWait(tab.id, target);
   await saveSettings({ activeId: accountId });
   return { ok: true };
 }

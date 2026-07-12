@@ -14,6 +14,13 @@
     "service_worker": "background.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://app.devin.ai/*"],
+      "js": ["lib/switch-inject.js"],
+      "run_at": "document_start"
+    }
+  ],
   "action": {
     "default_title": "打开 Devin 账号面板",
     "default_icon": {
