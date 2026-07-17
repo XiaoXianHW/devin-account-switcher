@@ -6,6 +6,7 @@ import {
   upsertImported,
   removeAccount,
 } from "./lib/store.js";
+import { exportSession } from "./lib/devin-export.js";
 
 const $ = (id) => document.getElementById(id);
 const gridEl = $("accountGrid");
@@ -239,6 +240,9 @@ async function loadSessions() {
   wrap.querySelectorAll("[data-open]").forEach((btn) => {
     btn.addEventListener("click", () => chrome.tabs.create({ url: btn.dataset.open }));
   });
+  wrap.querySelectorAll("[data-export]").forEach((btn) => {
+    btn.addEventListener("click", () => openExport(btn.dataset.export, btn.dataset.title));
+  });
 }
 
 function statusClass(status) {
@@ -260,6 +264,7 @@ function sessionHtml(s) {
       </div>
     </div>
     ${s.url ? `<button class="btn-sm" data-open="${esc(s.url)}" title="打开">打开</button>` : ""}
+    <button class="btn-sm" data-export="${esc(s.id)}" data-title="${esc(s.title || s.id)}" title="导出会话（对话 / 全量）">导出</button>
     <button class="btn-sm danger" data-del="${esc(s.id)}" title="永久删除会话">删除</button>
   </div>`;
 }
@@ -284,6 +289,83 @@ async function deleteSession(sessionId, btn) {
     toast("删除失败：" + (res && res.error ? res.error : ""), "err");
   }
 }
+
+// ---- Export ----
+let exportSid = null;
+let exportTitle = "";
+let exporting = false;
+
+function openExport(sid, title) {
+  exportSid = sid;
+  exportTitle = title || sid;
+  $("exportSub").textContent = exportTitle;
+  const status = $("exportStatus");
+  status.className = "export-status hidden";
+  status.textContent = "";
+  document.querySelectorAll(".export-mode").forEach((b) => (b.disabled = false));
+  $("exportOverlay").classList.remove("hidden");
+}
+function closeExport() {
+  if (exporting) return;
+  $("exportOverlay").classList.add("hidden");
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+async function runExport(mode) {
+  if (exporting || !exportSid) return;
+  const accounts = await getAccounts();
+  const acc = accounts.find((a) => a.id === panelAccountId);
+  if (!acc || !acc.session) return toast("该账号没有会话 token", "err");
+  const { devinUrl } = await getSettings();
+  exporting = true;
+  document.querySelectorAll(".export-mode").forEach((b) => (b.disabled = true));
+  const status = $("exportStatus");
+  status.className = "export-status";
+  const setStatus = (m) => (status.textContent = m);
+  setStatus("准备中 …");
+  const res = await exportSession({
+    devinUrl,
+    token: acc.session.token,
+    orgId: acc.session.orgId,
+    sessionId: exportSid,
+    mode,
+    redact: $("optRedact").checked,
+    includeThoughts: $("optThoughts").checked,
+    includeShell: $("optShell").checked,
+    onProgress: setStatus,
+  });
+  exporting = false;
+  document.querySelectorAll(".export-mode").forEach((b) => (b.disabled = false));
+  if (res.ok) {
+    triggerDownload(res.blob, res.filename);
+    const s = res.stats || {};
+    setStatus(`完成：${res.filename}（${s.events || 0} 事件，${s.filesModified || 0} 文件）`);
+    toast("已导出 " + res.filename, "ok");
+    setTimeout(() => $("exportOverlay").classList.add("hidden"), 1200);
+  } else {
+    status.className = "export-status err";
+    setStatus("导出失败：" + (res.error || "未知错误"));
+    if (res.expired) toast("会话 token 已过期，请重新登录该账号", "err");
+  }
+}
+
+$("exportClose").addEventListener("click", closeExport);
+$("exportOverlay").addEventListener("click", (e) => {
+  if (e.target === $("exportOverlay")) closeExport();
+});
+document.querySelectorAll(".export-mode").forEach((b) => {
+  b.addEventListener("click", () => runExport(b.dataset.xmode));
+});
 
 // ---- Import ----
 let importMode = "github";

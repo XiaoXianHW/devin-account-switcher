@@ -1,0 +1,13 @@
+{
+  "name": "devin-account-switcher",
+  "version": "1.0.0",
+  "description": "Chrome extension to import multiple GitHub accounts, auto-login to Devin, switch accounts, view quota and delete sessions.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --ext .js"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}

@@ -24,6 +24,13 @@
   真正结束并删除会话（**不再降级为归档**）。该接口需要 Service API Key，插件会用账号的会话
   **自动创建**一个组织级 Service User（Admin 角色）并保存其 Key 复用；删除成功后本地隐藏该会话，
   以免它在列表里重现。
+- **会话导出**：会话侧栏每个会话都有「导出」，可选两种模式：
+  - **仅导出会话**：拉取事件流，生成单个 `conversation.md`（含元数据、最后动作、文件改动清单、
+    完整对话），适合快速交接给下一个 AI 会话。
+  - **全量导出**：额外通过 presigned URL 下载所有文件修改前后快照，打包成 zip：
+    `conversation.md` + `final/`（改后文件）+ `original/`（改前文件）+ `diffs/`（逐文件 patch）
+    + `ALL_CHANGES.patch`（可直接 `git apply`）+ `MANIFEST.json`。
+  - 默认**脱敏**导出内容中的 token / API Key 等敏感串；可选包含 Devin 内心独白与 shell 命令计数。
 
 ## 安装（加载已解压的扩展）
 

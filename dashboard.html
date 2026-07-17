@@ -108,6 +108,35 @@
       </aside>
     </div>
 
+    <!-- Export dialog -->
+    <div id="exportOverlay" class="overlay hidden">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>导出会话</h3>
+          <button id="exportClose" class="icon-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="exportSub" class="export-sub"></div>
+          <div class="export-modes">
+            <button class="export-mode" data-xmode="chat">
+              <span class="xm-title">仅导出会话</span>
+              <span class="xm-desc">只导对话历史，输出单个 <code>conversation.md</code>（最快，不下载文件）。</span>
+            </button>
+            <button class="export-mode" data-xmode="full">
+              <span class="xm-title">全量导出</span>
+              <span class="xm-desc">对话 + 所有文件改动 + diff，打包成 <code>.zip</code>。</span>
+            </button>
+          </div>
+          <div class="export-opts">
+            <label><input type="checkbox" id="optRedact" checked /> 脱敏敏感信息（token / 密钥，推荐）</label>
+            <label><input type="checkbox" id="optThoughts" /> 包含 Devin 内心独白</label>
+            <label><input type="checkbox" id="optShell" /> 包含 shell 命令计数</label>
+          </div>
+          <div id="exportStatus" class="export-status hidden"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="toast" class="toast hidden"></div>
 
     <script type="module" src="dashboard.js"></script>

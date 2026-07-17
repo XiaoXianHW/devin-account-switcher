@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "webextensions": true,
+    "serviceworker": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-empty": ["warn", { "allowEmptyCatch": true }]
+  }
+}

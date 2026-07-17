@@ -771,6 +771,62 @@ textarea:focus {
 .toast.ok { border-left-color: var(--ui-success); }
 .toast.err { border-left-color: var(--ui-danger); }
 
+/* Export dialog */
+.export-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ui-fg-muted);
+  border: 1px solid var(--ui-line);
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+.export-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.export-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding: 16px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line-strong);
+  color: var(--ui-fg);
+  cursor: pointer;
+  transition: border-color var(--ui-dur-fast) var(--ui-ease), background var(--ui-dur-fast) var(--ui-ease);
+}
+.export-mode:hover { border-color: var(--ui-fg); background: var(--ui-surface-2); }
+.export-mode:disabled { opacity: 0.4; cursor: not-allowed; }
+.export-mode .xm-title { font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; }
+.export-mode .xm-desc { font-size: 11.5px; line-height: 1.6; color: var(--ui-fg-muted); }
+.export-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.export-opts label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ui-fg-muted);
+  cursor: pointer;
+}
+.export-status {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ui-fg-muted);
+  border-top: 1px solid var(--ui-line);
+  padding-top: 12px;
+  word-break: break-all;
+}
+.export-status.err { color: var(--ui-danger); }
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb {
