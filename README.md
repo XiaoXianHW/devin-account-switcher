@@ -20,10 +20,11 @@
 - **账号列表**：卡片式展示邮箱、组织、登录状态、额度、API Key 就绪状态。
 - **一键切换**：把选中账号的会话写入 `app.devin.ai` 的 `localStorage`，刷新页面即登录该账号。
 - **额度展示**：读取 `billing/quota/usage` 的 `overage_balance`，并在概览里汇总。
-- **会话永久删除**：调用官方 v3 接口 `DELETE /v3/organizations/{orgId}/sessions/{sessionId}`
-  真正结束并删除会话（**不再降级为归档**）。该接口需要 Service API Key，插件会用账号的会话
+- **会话关闭（伪删除）**：此处调用官方 v3 接口 `DELETE /v3/organizations/{orgId}/sessions/{sessionId}`
+  真正结束会话（**不再降级为归档**）。该接口需要 Service API Key，插件会用账号的会话
   **自动创建**一个组织级 Service User（Admin 角色）并保存其 Key 复用；删除成功后本地隐藏该会话，
   以免它在列表里重现。
+  （tips:因官方本身从源头上就没能提供完全删除会话的接口，只能做到结束会话使他无法再次重启和继续，如果注重隐私性内容请尽可能避免使用这种云端agent，如涉及到法律和利益性等严重问题请直接通过email联系devin官方要求完全清除数据）
 - **会话导出**：会话侧栏每个会话都有「导出」，可选两种模式：
   - **仅导出会话**：拉取事件流，生成单个 `conversation.md`（含元数据、最后动作、文件改动清单、
     完整对话），适合快速交接给下一个 AI 会话。
